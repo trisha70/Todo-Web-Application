@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>My Tasks | TodoBuddy ✨</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+
+:root{
+ --bg:#f0f2ff;
+ --sidebar:#ffffff;
+ --text:#2d3436;
+ --primary:#6c5ce7;
+ --accent:#00cec9;
+ --highlight:#fd79a8;
+ --card-bg:#ffffff;
+ --shadow:0 15px 35px rgba(108,92,231,0.15);
+}
+
+body{
+font-family:'Outfit',sans-serif;
+background:var(--bg);
+display:flex;
+margin:0;
+}
+
+/* sidebar */
+
+.sidebar{
+width:260px;
+background:var(--sidebar);
+padding:40px 20px;
+}
+
+.logo{
+font-size:26px;
+font-weight:800;
+color:#6c5ce7;
+margin-bottom:40px;
+}
+
+.main{
+flex:1;
+padding:50px;
+}
+
+/* filters */
+
+.task-filters{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+margin-bottom:25px;
+}
+
+.filter-btn{
+padding:10px 18px;
+border-radius:14px;
+background:white;
+text-decoration:none;
+color:#2d3436;
+font-weight:600;
+box-shadow:var(--shadow);
+}
+
+.filter-btn:hover{
+background:#6c5ce7;
+color:white;
+}
+
+/* search */
+
+.search-container{
+display:flex;
+gap:10px;
+margin-bottom:30px;
+}
+
+.search-input{
+flex:1;
+padding:12px 18px;
+border-radius:20px;
+border:none;
+box-shadow:var(--shadow);
+}
+
+/* table */
+
+.task-table-card{
+background:white;
+border-radius:25px;
+padding:20px;
+box-shadow:var(--shadow);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+padding:15px;
+text-align:left;
+color:#6c5ce7;
+font-size:0.8rem;
+}
+
+td{
+padding:15px;
+border-top:1px solid rgba(0,0,0,0.05);
+}
+
+/* badges */
+
+.badge{
+padding:6px 10px;
+border-radius:8px;
+font-weight:700;
+font-size:0.8rem;
+}
+
+.priority-HIGH{
+background:#ffe5e5;
+color:#e63946;
+}
+
+.priority-MEDIUM{
+background:#fff4cc;
+color:#e9c46a;
+}
+
+.priority-LOW{
+background:#e6fff7;
+color:#2a9d8f;
+}
+
+/* buttons */
+
+.action-btn{
+width:34px;
+height:34px;
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+}
+
+.btn-complete{
+background:#00cec9;
+}
+
+.btn-edit{
+background:#6c5ce7;
+}
+
+.btn-delete{
+background:#ff7675;
+}
+
+.btn-disabled{
+background:#b2bec3;
+cursor:not-allowed;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">TodoBuddy ✨</div>
+
+<a th:href="@{/dashboard}" class="filter-btn">🏠 Dashboard</a>
+
+
+</div>
+
+
+<div class="main">
+
+<h2>Organize Your Magic 🪄</h2>
+
+<br>
+
+<!-- MAIN FILTERS -->
+
+<div class="task-filters">
+
+<a th:href="@{/yourTasks}" class="filter-btn">📂 All</a>
+
+<a th:href="@{/dueTasks}" class="filter-btn">⏳ Pending</a>
+
+<a th:href="@{/completedTasks}" class="filter-btn">⭐ Completed</a>
+
+<a th:href="@{/deletedTasks}" class="filter-btn">🗑 Trash</a>
+
+</div>
+
+<!-- PRIORITY FILTERS -->
+
+<div class="task-filters">
+
+<a th:href="@{/tasks/priority/HIGH}" class="filter-btn">🔴 High</a>
+
+<a th:href="@{/tasks/priority/MEDIUM}" class="filter-btn">🟡 Medium</a>
+
+<a th:href="@{/tasks/priority/LOW}" class="filter-btn">🟢 Low</a>
+
+<a th:href="@{/tasks/sort/priority}" class="filter-btn">⚡ Sort by Priority</a>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<form th:action="@{/task/search}" method="get" class="search-container">
+
+<input type="text" name="keyword" class="search-input"
+placeholder="Search tasks...">
+
+<button type="submit" class="filter-btn">🔍 Search</button>
+
+</form>
+
+
+<!-- TABLE -->
+
+<div class="task-table-card">
+
+<table>
+
+<thead>
+<tr>
+<th>Task</th>
+<th>Timeline</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr th:each="t : ${tasks}">
+
+<td>
+<strong th:text="${t.title}"></strong><br>
+<small th:text="${t.taskDate}"></small>
+</td>
+
+<td>
+<span th:text="${t.startTime}"></span>
+-
+<span th:text="${t.endTime}"></span>
+</td>
+
+<td>
+<span th:class="'badge priority-' + ${t.priority}"
+th:text="${t.priority}">
+</span>
+</td>
+
+<td>
+
+<span th:if="${t.completed}" style="color:#00b894">
+✔ Done
+</span>
+
+<span th:if="${!t.completed}" style="color:#fd79a8">
+● In Progress
+</span>
+
+</td>
+
+<td>
+
+<div style="display:flex;gap:6px">
+
+<!-- COMPLETE BUTTON -->
+
+<a th:href="@{/task/complete/{id}(id=${t.id})}"
+th:if="${!t.completed}">
+<button class="action-btn btn-complete">
+<i class="fa-solid fa-check"></i>
+</button>
+</a>
+
+<button th:if="${t.completed}"
+class="action-btn btn-disabled">
+<i class="fa-solid fa-check"></i>
+</button>
+
+
+<!-- EDIT -->
+
+<a th:href="@{/task/edit/{id}(id=${t.id})}">
+<button class="action-btn btn-edit">
+<i class="fa-solid fa-pen"></i>
+</button>
+</a>
+
+<!-- DELETE -->
+
+<a th:href="@{/task/delete/{id}(id=${t.id})}">
+<button class="action-btn btn-delete">
+<i class="fa-solid fa-trash"></i>
+</button>
+</a>
+
+</div>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<div th:if="${#lists.isEmpty(tasks)}"
+style="text-align:center;padding:40px;opacity:0.6">
+
+No tasks found ☕
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
